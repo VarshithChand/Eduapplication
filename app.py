@@ -18,7 +18,7 @@ app.secret_key = "your_secret_key"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-USER_DATA_FILE = os.path.join(BASE_DIR, 'users.txt')
+USER_DATA_FILE = os.path.join(BASE_DIR, 'users.json')
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'xlsx', 'csv', 'ppt', 'pptx', 'mp4', 'avi', 'zip', 'rar'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
