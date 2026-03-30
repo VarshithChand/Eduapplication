@@ -638,16 +638,31 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        if username in USER_DATA and password == USER_DATA[username]:
-            session["username"] = username
-            session["is_superuser"] = False
-            return redirect(url_for("welcome"))
-        elif username in SUPERUSER_DATA and password == SUPERUSER_DATA[username]:
-            session["username"] = username
-            session["is_superuser"] = True
-            return redirect(url_for("superuser_dashboard"))
-        return render_template("login.html", error="Invalid credentials")
+
+        # Check regular users
+        if username in USER_DATA:
+            if password == USER_DATA[username]:
+                session["username"] = username
+                session["is_superuser"] = False
+                return redirect(url_for("welcome"))
+            else:
+                return render_template("login.html", error="Incorrect password. Please try again.")
+
+        # Check superuser
+        elif username in SUPERUSER_DATA:
+            if password == SUPERUSER_DATA[username]:
+                session["username"] = username
+                session["is_superuser"] = True
+                return redirect(url_for("superuser_dashboard"))
+            else:
+                return render_template("login.html", error="Incorrect password. Please try again.")
+
+        # Username not found
+        else:
+            return render_template("login.html", error="No account found with that username.")
+
     return render_template("login.html")
+
 
 @app.route("/logout")
 def logout():
