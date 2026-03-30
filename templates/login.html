@@ -6,8 +6,12 @@
     <title>Login - EduPlatform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+       
+    </style>
 </head>
 <body>
+
     <div class="background-animation">
         <div class="floating-shape shape-1"></div>
         <div class="floating-shape shape-2"></div>
@@ -15,9 +19,10 @@
         <div class="floating-shape shape-4"></div>
         <div class="floating-shape shape-5"></div>
     </div>
-    
+
     <div class="container">
         <div class="login-card">
+
             <div class="card-header">
                 <div class="logo-container">
                     <i class="fas fa-graduation-cap"></i>
@@ -25,150 +30,155 @@
                 <h1 class="welcome-title">Welcome Back!</h1>
                 <p class="subtitle">Sign in to your learning portal</p>
             </div>
-            
-            <form method="POST" class="login-form">
+
+            <form method="POST" class="login-form" id="loginForm">
+
+                <!-- Username field -->
                 <div class="input-group">
-                    <div class="input-container">
+                    <div class="input-container{% if error_type == 'user' %} field-error{% endif %}" id="usernameContainer">
                         <i class="fas fa-user input-icon"></i>
-                        <input type="text" name="username" placeholder="Username" required class="form-input">
+                        <input type="text" name="username" id="usernameInput"
+                               placeholder="Username" required class="form-input"
+                               value="{{ request.form.get('username', '') }}">
                         <div class="input-line"></div>
                     </div>
                 </div>
-                
+
+                <!-- Password field -->
                 <div class="input-group">
-                    <div class="input-container">
+                    <div class="input-container{% if error_type == 'password' %} field-error{% endif %}" id="passwordContainer">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" name="password" placeholder="Password" required class="form-input" id="passwordInput">
+                        <input type="password" name="password" placeholder="Password"
+                               required class="form-input" id="passwordInput">
                         <button type="button" class="password-toggle" id="passwordToggle">
                             <i class="fas fa-eye"></i>
                         </button>
                         <div class="input-line"></div>
                     </div>
                 </div>
-                
+
+                <!-- Server-side error (from Flask) -->
                 {% if error %}
-                <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>{{ error }}</span>
+                <div class="error-message show type-{{ error_type }}" id="serverError">
+                    <i class="fas {% if error_type == 'user' %}fa-user-slash{% else %}fa-key{% endif %} error-icon"></i>
+                    <div class="error-body">
+                        <span class="error-title">
+                            {% if error_type == 'user' %}Account not found{% else %}Incorrect password{% endif %}
+                        </span>
+                        <span class="error-detail">{{ error }}</span>
+                    </div>
                 </div>
                 {% endif %}
-                
-                <button type="submit" class="login-button">
+
+                <button type="submit" class="login-button" id="loginBtn">
                     <span class="button-text">Sign In</span>
                     <i class="fas fa-arrow-right button-icon"></i>
                     <div class="button-ripple"></div>
                 </button>
+
             </form>
-            
+
             <div class="card-footer">
-                <div class="divider">
-                    <span>or</span>
-                </div>
+                <div class="divider"><span>or</span></div>
                 <p class="help-text">Need help? <a href="#" class="help-link">Contact Support</a></p>
             </div>
+
         </div>
     </div>
 
     <script>
-        // Password toggle functionality
+        /* ── Password show/hide ── */
         const passwordToggle = document.getElementById('passwordToggle');
-        const passwordInput = document.getElementById('passwordInput');
-        
-        passwordToggle.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            
-            const icon = this.querySelector('i');
-            icon.classList.toggle('fa-eye');
-            icon.classList.toggle('fa-eye-slash');
+        const passwordInput  = document.getElementById('passwordInput');
+        passwordToggle.addEventListener('click', function () {
+            const isHidden = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isHidden ? 'text' : 'password');
+            this.querySelector('i').classList.toggle('fa-eye',       !isHidden);
+            this.querySelector('i').classList.toggle('fa-eye-slash',  isHidden);
         });
 
-        // Input animation effects
-        const inputs = document.querySelectorAll('.form-input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('focused');
-            });
-            
-            input.addEventListener('blur', function() {
-                if (this.value === '') {
-                    this.parentElement.classList.remove('focused');
-                }
-            });
-            
-            // Check if input has value on page load
-            if (input.value !== '') {
-                input.parentElement.classList.add('focused');
-            }
+        /* ── Focus / blur animations ── */
+        document.querySelectorAll('.form-input').forEach(input => {
+            const container = input.closest('.input-container');
+            input.addEventListener('focus', () => container.classList.add('focused'));
+            input.addEventListener('blur',  () => { if (!input.value) container.classList.remove('focused'); });
+            if (input.value) container.classList.add('focused');
+
+            /* Clear field-error highlight on new keystroke */
+            input.addEventListener('input', () => container.classList.remove('field-error'), { once: true });
         });
 
-        // Button ripple effect
-        const loginButton = document.querySelector('.login-button');
-        loginButton.addEventListener('click', function(e) {
-            const ripple = this.querySelector('.button-ripple');
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-            
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-            ripple.classList.add('animate');
-            
-            setTimeout(() => {
-                ripple.classList.remove('animate');
-            }, 600);
-        });
+        /* ── Shake the highlighted field on page load if server sent an error ── */
+        (function () {
+            const errorType = "{{ error_type | default('') }}";
+            if (errorType === 'user')     shakeField('usernameContainer');
+            if (errorType === 'password') shakeField('passwordContainer');
+        })();
 
-        // Form validation with enhanced feedback
-        const form = document.querySelector('.login-form');
-        form.addEventListener('submit', function(e) {
-            const username = document.querySelector('input[name="username"]').value.trim();
-            const password = document.querySelector('input[name="password"]').value.trim();
-            
-            if (!username || !password) {
-                e.preventDefault();
-                showError('Please fill in all fields');
-            }
-        });
-
-        function showError(message) {
-            const existingError = document.querySelector('.error-message');
-            if (existingError) {
-                existingError.remove();
-            }
-            
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message';
-            errorDiv.innerHTML = `
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>${message}</span>
-            `;
-            
-            const button = document.querySelector('.login-button');
-            button.parentElement.insertBefore(errorDiv, button);
-            
-            // Animate error message
-            setTimeout(() => {
-                errorDiv.classList.add('show');
-            }, 10);
+        function shakeField(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('shake');
+            el.addEventListener('animationend', () => el.classList.remove('shake'), { once: true });
         }
 
-        // Keyboard navigation
-        document.addEventListener('keydown', function(e) {
+        /* ── Button ripple ── */
+        document.getElementById('loginBtn').addEventListener('click', function (e) {
+            const ripple = this.querySelector('.button-ripple');
+            const rect   = this.getBoundingClientRect();
+            const size   = Math.max(rect.width, rect.height);
+            ripple.style.width  = size + 'px';
+            ripple.style.height = size + 'px';
+            ripple.style.left   = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top    = (e.clientY - rect.top  - size / 2) + 'px';
+            ripple.classList.add('animate');
+            setTimeout(() => ripple.classList.remove('animate'), 600);
+        });
+
+        /* ── Client-side empty-field guard ── */
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            const u = document.getElementById('usernameInput').value.trim();
+            const p = document.getElementById('passwordInput').value.trim();
+            if (!u || !p) {
+                e.preventDefault();
+                const targetId = !u ? 'usernameContainer' : 'passwordContainer';
+                showClientError(targetId, 'Please fill in all fields.');
+            }
+        });
+
+        function showClientError(containerId, message) {
+            const old = document.getElementById('clientError');
+            if (old) old.remove();
+
+            const container = document.getElementById(containerId);
+            container.classList.add('field-error');
+            shakeField(containerId);
+
+            const div = document.createElement('div');
+            div.id = 'clientError';
+            div.className = 'error-message show type-password';
+            div.innerHTML = `
+                <i class="fas fa-exclamation-triangle error-icon"></i>
+                <div class="error-body">
+                    <span class="error-title">Missing information</span>
+                    <span class="error-detail">${message}</span>
+                </div>`;
+            const btn = document.getElementById('loginBtn');
+            btn.parentElement.insertBefore(div, btn);
+        }
+
+        /* ── Tab / Enter moves between fields ── */
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
-                const focusedElement = document.activeElement;
-                if (focusedElement.tagName === 'INPUT') {
-                    const inputs = Array.from(document.querySelectorAll('input'));
-                    const currentIndex = inputs.indexOf(focusedElement);
-                    if (currentIndex < inputs.length - 1) {
-                        e.preventDefault();
-                        inputs[currentIndex + 1].focus();
-                    }
+                const inputs = Array.from(document.querySelectorAll('.form-input'));
+                const idx    = inputs.indexOf(document.activeElement);
+                if (idx >= 0 && idx < inputs.length - 1) {
+                    e.preventDefault();
+                    inputs[idx + 1].focus();
                 }
             }
         });
     </script>
+
 </body>
 </html>
