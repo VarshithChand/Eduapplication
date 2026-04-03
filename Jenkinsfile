@@ -5,6 +5,7 @@ pipeline {
         IMAGE_NAME = "eduvault"
         DOCKER_USER = "varshithchand"
         IMAGE_TAG = "${DOCKER_USER}/${IMAGE_NAME}:latest"
+        VERSION_TAG = "${DOCKER_USER}/${IMAGE_NAME}:${BUILD_NUMBER}"
         CONTAINER_NAME = "eduvault-container"
         PORT = "5000"
     }
@@ -36,7 +37,10 @@ pipeline {
 
         stage('Tag Docker Image') {
             steps {
-                sh 'docker tag $IMAGE_NAME $IMAGE_TAG'
+                sh '''
+                docker tag $IMAGE_NAME $IMAGE_TAG
+                docker tag $IMAGE_NAME $VERSION_TAG
+                '''
             }
         }
 
@@ -54,7 +58,10 @@ pipeline {
 
         stage('Push Image to Docker Hub') {
             steps {
-                sh 'docker push $IMAGE_TAG'
+                sh '''
+                docker push $IMAGE_TAG
+                docker push $VERSION_TAG
+                '''
             }
         }
 
@@ -79,7 +86,7 @@ pipeline {
 
     post {
         success {
-            echo "✅ Build, Push & Deployment Successful!"
+            echo "✅ Image pushed (latest + version) & App deployed successfully!"
         }
         failure {
             echo "❌ Pipeline Failed! Check logs."
