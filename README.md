@@ -12,7 +12,7 @@ For DevOps practices, the project is containerized using **Docker** and automate
 
 # Features
 
-* User Registration and Login
+* User Registration  and Login
 * Course Modules for Programming Languages
 * Cloud Courses (AWS & Azure)
 * User Progress Tracking
