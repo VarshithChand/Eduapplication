@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "eduvault-app"
+        IMAGE_NAME = "eduvault"
         DOCKER_USER = "varshithchand"
         IMAGE_TAG = "${DOCKER_USER}/${IMAGE_NAME}:latest"
         CONTAINER_NAME = "eduvault-container"
