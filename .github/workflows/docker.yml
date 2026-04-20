@@ -1,52 +1,34 @@
-name: 🚀 Build, Push & Run Docker Image
+name: 🚀 Build & Push Docker Image
 
 on:
-push:
-branches:
-- master
+  push:
+    branches:
+      - master
 
 jobs:
-docker:
-runs-on: ubuntu-latest
+  docker:
+    runs-on: ubuntu-latest
 
-```
-steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  - name: Login to DockerHub
-    uses: docker/login-action@v3
-    with:
-      username: ${{ secrets.DOCKER_USERNAME }}
-      password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # 2️⃣ Login to Docker Hub
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  - name: Set up Docker Buildx
-    uses: docker/setup-buildx-action@v3
+      # 3️⃣ Setup Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-  - name: Build and Push Docker Image
-    uses: docker/build-push-action@v6
-    with:
-      context: .
-      push: true
-      tags: ${{ secrets.DOCKER_USERNAME }}/eduapplication:latest
-
-  - name: Pull Docker Image
-    run: docker pull ${{ secrets.DOCKER_USERNAME }}/eduapplication:latest
-
-  - name: Remove old container
-    run: docker rm -f mycontainer || true
-
-  - name: Run Container
-    run: docker run -d -p 5000:5000 --name mycontainer ${{ secrets.DOCKER_USERNAME }}/eduapplication:latest
-
-  - name: Wait for container
-    run: sleep 10
-
-  - name: Check Container Running
-    run: |
-      docker ps
-      docker inspect -f '{{.State.Running}}' mycontainer
-
-  - name: Test Application
-    run: curl -f http://localhost:5000 || exit 1
-```
+      # 4️⃣ Build & Push Image
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/eduapplication:latest
