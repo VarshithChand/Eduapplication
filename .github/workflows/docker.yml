@@ -9,7 +9,7 @@ jobs:
 docker:
 runs-on: ubuntu-latest
 
-
+```
 steps:
   - name: Checkout code
     uses: actions/checkout@v4
@@ -37,8 +37,7 @@ steps:
     run: docker rm -f mycontainer || true
 
   - name: Run Container
-    run: |
-      docker run -d -p 5000:5000 --name mycontainer ${{ secrets.DOCKER_USERNAME }}/eduapplication:latest
+    run: docker run -d -p 5000:5000 --name mycontainer ${{ secrets.DOCKER_USERNAME }}/eduapplication:latest
 
   - name: Wait for container
     run: sleep 10
@@ -49,5 +48,5 @@ steps:
       docker inspect -f '{{.State.Running}}' mycontainer
 
   - name: Test Application
-    run: |
-      curl -f http://localhost:5000 || exit 1
+    run: curl -f http://localhost:5000 || exit 1
+```
