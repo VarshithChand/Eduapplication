@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 # EduApplication
 
 ## Overview
